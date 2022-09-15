@@ -46,13 +46,6 @@ public class ElementDetector extends OpenCvPipeline {
         telemetry.update();
 
         Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2HSV);
-        // Creating color spectrum for the DUCK identification
-        //Scalar lowHSV = new Scalar(30, 50, 50);
-        //Scalar highHSV = new Scalar(125, 100, 100);
-
-        // Blue Identification
-        //Scalar lowHSV = new Scalar(120, 20, 20);
-        //Scalar highHSV = new Scalar(300, 100, 100);
 
         // Green Identification
         Scalar lowHSV = new Scalar(40, 70, 0);

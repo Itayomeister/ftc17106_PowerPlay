@@ -3,27 +3,20 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous
-public class RedCycles extends PlanTechOpMode {
+public class Red_Auto_1 extends PlanTechOpMode {
 
     @Override
-    protected void postInit() {
-        initServos();
-        calibrateGyro();
-        side = 1;
+    public void postInit() {
+
     }
 
     @Override
     protected void run() {
         runtime.reset();
-        autoCycle();
     }
-
 
     @Override
     public void end() {
-        closeAllMotors();
-        closeServos();
-        odometry.stop();
     }
 
 

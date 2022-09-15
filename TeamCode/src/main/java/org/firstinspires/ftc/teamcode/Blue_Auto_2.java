@@ -1,24 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.*;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import static java.lang.Math.*;
-
-@TeleOp
-public class TestOpMode extends PlanTechOpMode {
+@Autonomous
+public class Blue_Auto_2 extends PlanTechOpMode {
 
     @Override
     protected void postInit() {
-        //initCamera(); add to super post init
+
     }
 
     @Override
     protected void run() {
-
+        runtime.reset();
     }
 
     @Override
     protected void end() {
-
     }
 }
