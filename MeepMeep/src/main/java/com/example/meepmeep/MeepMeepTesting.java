@@ -4,6 +4,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.DisplacementMarker;
 import com.noahbres.meepmeep.MeepMeep;
+import com.noahbres.meepmeep.core.colorscheme.ColorScheme;
+import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueDark;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveTrainType;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
@@ -12,12 +14,12 @@ import com.noahbres.meepmeep.MeepMeep.Background.*;
 import static java.lang.Math.*;
 
 public class MeepMeepTesting {
-    static double botWidth = 12, botHeight = 15;
+    static double botWidth = 14, botHeight = 14;
     static double tileSize_Inches = 24;
-    static double hubRadius = 9;
-    static double offset = 1;
-    static double wait = .45;
     static double sideModifier = 1; // -1 for blue alliance
+    static int x_offset = 2;
+
+    static Pose2d startPos = new Pose2d(-1.5d * tileSize_Inches, -3d * tileSize_Inches + botHeight / 2d + x_offset, toRadians(90));
 
 
     public static void main(String[] args) {
@@ -28,17 +30,61 @@ public class MeepMeepTesting {
                 .setConstraints(80, 80, Math.toRadians(180), Math.toRadians(180), botWidth)
                 .setDriveTrainType(DriveTrainType.MECANUM)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-3d * tileSize_Inches + botHeight/2d, -.5d * tileSize_Inches + botHeight / 2d))
-                                .waitSeconds(120)
+                        drive.trajectorySequenceBuilder(startPos)
+                                .waitSeconds(1)
+                                .lineTo(new Vector2d(-1.5d * tileSize_Inches
+                                        , -1.25d * tileSize_Inches + botHeight / 2d + x_offset))
+                                //.forward(tileSize_Inches)
+                                .waitSeconds(4) // deploy preload cone
+                                // deploy cone + collect
+                                .splineTo(new Vector2d(-2.5d * tileSize_Inches + botHeight / 2d
+                                        , -.55d * tileSize_Inches), toRadians(180)) //rotate turret while robot is moving
+                                .waitSeconds(2) // take cone
+                                .back(.5d * tileSize_Inches) // rotate turret
+                                .waitSeconds(4) // deploy cone
+                                .forward(.5d * tileSize_Inches) // rotate turret
+                                .waitSeconds(4)
+                                .back(.5d * tileSize_Inches)
+                                .waitSeconds(4)
+                                .forward(.5d * tileSize_Inches)
+                                .waitSeconds(4)
+                                .lineToSplineHeading(new Pose2d(-1.75d * tileSize_Inches + botHeight/2d, -.55d * tileSize_Inches, toRadians(90)))
+                                .build()
+                );
+
+        RoadRunnerBotEntity myBot1 = new DefaultBotBuilder(meepMeep)
+                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setConstraints(80, 80, Math.toRadians(180), Math.toRadians(180), botWidth)
+                .setDriveTrainType(DriveTrainType.TANK)
+                .followTrajectorySequence(drive ->
+                        drive.trajectorySequenceBuilder(new Pose2d(1.5d * tileSize_Inches, -3d * tileSize_Inches + botHeight / 2d + x_offset, toRadians(90)))
+                                .waitSeconds(1)
+                                .lineTo(new Vector2d(1.5d * tileSize_Inches
+                                        , -1.25d * tileSize_Inches + botHeight / 2d + x_offset))
+                                //.forward(tileSize_Inches)
+                                .waitSeconds(4) // deploy preload cone
+                                // deploy cone + collect
+                                .splineTo(new Vector2d(2.5d * tileSize_Inches - botHeight / 2d
+                                        , -.55d * tileSize_Inches), toRadians(0)) //rotate turret while robot is moving
+                                .waitSeconds(2) // take cone
+                                .setReversed(true)
+                                .back(1.5d * tileSize_Inches) // rotate turret
+                                .waitSeconds(4) // deploy cone
+                                .forward(1.5d * tileSize_Inches) // rotate turret
+                                .waitSeconds(4)
+                                .back(1.5d * tileSize_Inches)
+                                .waitSeconds(30)
                                 .build()
                 );
 
         myBot.setDimensions(botWidth, botHeight);
+        myBot1.setDimensions(botWidth, botHeight);
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_POWERPLAY_OFFICIAL)
                 .setDarkMode(true)
                 .setBackgroundAlpha(1f)
                 .addEntity(myBot)
+                .addEntity(myBot1)
                 .start();
     }
 
