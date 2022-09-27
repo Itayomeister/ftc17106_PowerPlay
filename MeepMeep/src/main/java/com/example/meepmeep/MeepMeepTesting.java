@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.trajectory.DisplacementMarker;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.core.colorscheme.ColorScheme;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueDark;
+import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueLight;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveTrainType;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
