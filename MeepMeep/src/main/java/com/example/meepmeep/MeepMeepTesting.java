@@ -14,6 +14,8 @@ import com.noahbres.meepmeep.MeepMeep.Background.*;
 
 import static java.lang.Math.*;
 
+import java.awt.Color;
+
 public class MeepMeepTesting {
     static double botWidth = 14, botHeight = 14;
     static double tileSize_Inches = 24;
@@ -56,7 +58,7 @@ public class MeepMeepTesting {
         RoadRunnerBotEntity myBot1 = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(80, 80, Math.toRadians(180), Math.toRadians(180), botWidth)
-                .setDriveTrainType(DriveTrainType.TANK)
+                .setDriveTrainType(DriveTrainType.TANK).setColorScheme(new ColorSchemeBlueDark())
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(1.5d * tileSize_Inches, -3d * tileSize_Inches + botHeight / 2d + x_offset, toRadians(90)))
                                 .waitSeconds(1)
