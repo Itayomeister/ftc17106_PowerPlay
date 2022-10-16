@@ -74,6 +74,7 @@ public abstract class PlanTechOpMode extends LinearOpMode {
 
     protected abstract void end();
 
+
     public void armHigh() {
         double degreees = toDegrees(asin(70 / 80));
         //B = beta,degreees = alpha,T=ticks
@@ -116,7 +117,6 @@ public abstract class PlanTechOpMode extends LinearOpMode {
     public void armHigh2() {
         int degreesToTicks = FINALARMCOUNT *135/360; // sets to 135 deg angle
         arm2.setTargetPosition(degreesToTicks);
-        //hehehehe
     }
 }
 
