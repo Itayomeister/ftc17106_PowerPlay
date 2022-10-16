@@ -116,6 +116,7 @@ public abstract class PlanTechOpMode extends LinearOpMode {
     public void armHigh2() {
         int degreesToTicks = FINALARMCOUNT *135/360; // sets to 135 deg angle
         arm2.setTargetPosition(degreesToTicks);
+        //hehehehe
     }
 }
 
