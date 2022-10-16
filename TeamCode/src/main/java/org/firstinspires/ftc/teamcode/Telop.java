@@ -19,6 +19,18 @@ public class Telop extends PlanTechOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+           if (gamepad2.a){
+               armgound();
+           }
+            if (gamepad2.y){
+                armHigh();
+            }
+            if (gamepad2.b){
+                armMid();
+            }
+            if (gamepad2.x){
+                armlow();
+            }
 
 
         }

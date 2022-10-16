@@ -14,6 +14,12 @@ public class TestOpMode extends PlanTechOpMode {
 
     @Override
     protected void run() {
+        runtime.reset();
+
+        if (gamepad1.x)
+            arm1.setPower(.1);
+        else
+            arm1.setPower(0);
 
     }
 

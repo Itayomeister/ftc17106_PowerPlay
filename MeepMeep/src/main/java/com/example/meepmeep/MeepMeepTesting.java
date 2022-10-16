@@ -80,6 +80,7 @@ public class MeepMeepTesting {
                                 .build()
                 );
 
+
         myBot.setDimensions(botWidth, botHeight);
         myBot1.setDimensions(botWidth, botHeight);
 
