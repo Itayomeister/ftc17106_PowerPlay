@@ -47,7 +47,6 @@ public abstract class PlanTechOpMode extends LinearOpMode {
 
     void initialize() {
 
-
     }
 
     @Override
