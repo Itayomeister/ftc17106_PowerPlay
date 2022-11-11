@@ -8,6 +8,7 @@ public class Telop extends PlanTechOpMode {
 
     @Override
     protected void postInit() {
+        initCamera();
     }
 
     @Override
@@ -20,19 +21,27 @@ public class Telop extends PlanTechOpMode {
 
         while (opModeIsActive()) {
            if (gamepad2.a){
-               armgound();
+               crServo1.setPower(.5);
+               crServo2.setPower(.5);
+               servo1.setPosition(1);
            }
             if (gamepad2.y){
-                armHigh();
+                dcMotorEx1.setPower(.5);
+                dcMotorEx2.setPower(.5);
             }
             if (gamepad2.b){
-                armMid();
+                crServo1.setPower(-.5);
+                crServo2.setPower(-.5);
+                servo1.setPosition(-1);
             }
             if (gamepad2.x){
-                armlow();
+                dcMotorEx1.setPower(-.5);
+                dcMotorEx2.setPower(-.5);
             }
-
-
+            crServo2.setPower(0);
+            crServo1.setPower(0);
+            dcMotorEx2.setPower(0);
+            dcMotorEx1.setPower(0);
         }
 
     }

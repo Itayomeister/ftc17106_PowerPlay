@@ -1,17 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.util.Log;
-
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.*;
 import org.opencv.core.*;
@@ -19,28 +8,32 @@ import org.opencv.core.*;
 public class ElementDetector extends OpenCvPipeline {
     Telemetry telemetry;
     Mat mat = new Mat(); // Defining new mat
+
     // Creating list of possible duck places and a location variable
-    public enum Location{
+    public enum Location {
         LEFT,
         MIDDLE,
         RIGHT,
         NOT_FOUND
     }
+
     private Location location;
 
-    // Creating ROIs (regions of interest) for the 3 barcodes
-    static final Rect LEFT_ROI = new Rect(new Point(1500, 500), new Point(1750, 700));
-    static final Rect MIDDLE_ROI = new Rect(new Point(850, 500), new Point(1150, 700));
-    static final Rect RIGHT_ROI = new Rect(new Point(300, 500), new Point(660, 700));
+    // Creating ROI (region of interest) for the signal cone
+    static final Rect SIGNAL_ROI = new Rect(new Point(850, 500), new Point(1150, 700));
+
     // Creating threshold percentages for clearance
     static double PERCENT_COLOR_THRESHOLD = 0.2;
 
-    static int elementPos = 3;
+    static int parkingSpot;
+
     // Telemetry constructor
-    public ElementDetector(Telemetry t) { telemetry = t; }
+    public ElementDetector(Telemetry t) {
+        telemetry = t;
+    }
 
     @Override
-    public Mat processFrame(Mat input)  {
+    public Mat processFrame(Mat input) {
         // Converting from RGB to HSV (color, intensity, brightness)
         telemetry.addData("In ElementDetector", "class");
         telemetry.update();
@@ -48,90 +41,94 @@ public class ElementDetector extends OpenCvPipeline {
         Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2HSV);
 
         // Green Identification
-        Scalar lowHSV = new Scalar(40, 70, 0);
-        Scalar highHSV = new Scalar(90, 255, 255);
+        Scalar greenLowHSV = new Scalar(40, 70, 0);
+        Scalar greenHighHSV = new Scalar(90, 255, 255);
+
+        // Red Identification
+        Scalar redLowHSV = new Scalar(160, 45, 100);
+        Scalar redHighHSV = new Scalar(180, 255, 255);
+
+        // Blue Identification
+        Scalar blueLowHSV = new Scalar(100, 100, 100);
+        Scalar blueHighHSV = new Scalar(120, 255, 255);
 
         // Creating the range and a mat for each barcode
-        Core.inRange(mat, lowHSV, highHSV, mat);
-        Mat left = mat.submat(LEFT_ROI);
-        Mat middle = mat.submat(MIDDLE_ROI);
-        Mat right = mat.submat(RIGHT_ROI);
+        Mat redCheck = mat.submat(SIGNAL_ROI);
+        Core.inRange(redCheck, redLowHSV, redHighHSV, redCheck);
+        Mat blueCheck = mat.submat(SIGNAL_ROI);
+        Core.inRange(blueCheck, blueLowHSV, blueHighHSV, blueCheck);
+        Mat greenCheck = mat.submat(SIGNAL_ROI);
+        Core.inRange(greenCheck, greenLowHSV, greenHighHSV, greenCheck);
 
         // Calculating the percentage of identified ducks in each mat
-        double leftValue = Core.sumElems(left).val[0] / LEFT_ROI.area() / 255;
-        double middleValue = Core.sumElems(middle).val[0] / MIDDLE_ROI.area() / 255;
-        double rightValue = Core.sumElems(right).val[0] / RIGHT_ROI.area() / 255;
+        double blueValue = Core.sumElems(blueCheck).val[0] / SIGNAL_ROI.area() / 255;
+        double redValue = Core.sumElems(redCheck).val[0] / SIGNAL_ROI.area() / 255;
+        double greenValue = Core.sumElems(greenCheck).val[0] / SIGNAL_ROI.area() / 255;
 
-        // Releasing
-        left.release();
-        middle.release();
-        right.release();
+        // Releasing submats
+        redCheck.release();
+        blueCheck.release();
+        greenCheck.release();
 
         // Adding telemetry data
-        telemetry.addData("Left raw value", (int) Core.sumElems(left).val[0]);
-        telemetry.addData("Left percentage", Math.round(leftValue * 100) + "%");
-        telemetry.addData("Middle raw value", (int) Core.sumElems(middle).val[0]);
-        telemetry.addData("Middle percentage", Math.round(middleValue * 100) + "%");
-        telemetry.addData("Right raw value", (int) Core.sumElems(right).val[0]);
-        telemetry.addData("Right percentage", Math.round(rightValue * 100) + "%");
+        telemetry.addData("Left raw value", (int) Core.sumElems(redCheck).val[0]);
+        telemetry.addData("Left percentage", Math.round(redValue * 100) + "%");
+        telemetry.addData("Middle raw value", (int) Core.sumElems(blueCheck).val[0]);
+        telemetry.addData("Middle percentage", Math.round(blueValue * 100) + "%");
+        telemetry.addData("Right raw value", (int) Core.sumElems(greenCheck).val[0]);
+        telemetry.addData("Right percentage", Math.round(greenValue * 100) + "%");
 
         // Creating booleans for team scoring element location
-        boolean elementLeft = leftValue > PERCENT_COLOR_THRESHOLD;
-        boolean elementMiddle = middleValue > PERCENT_COLOR_THRESHOLD;
-        boolean elementRight = rightValue > PERCENT_COLOR_THRESHOLD;
+        boolean signalRed = redValue > PERCENT_COLOR_THRESHOLD && redValue > blueValue && redValue > greenValue;
+        boolean signalBlue = blueValue > PERCENT_COLOR_THRESHOLD && blueValue > redValue && blueValue > greenValue;
+        boolean signalGreen = greenValue > PERCENT_COLOR_THRESHOLD && greenValue > redValue && greenValue > blueValue;
 
-        // Deciding in which position the element is. Element not detected => Level 3
-        //elementPos = 3;
-
-        if (elementLeft && leftValue > middleValue && leftValue > rightValue)
-            elementPos = 1;
-        else if (elementMiddle && middleValue > rightValue && middleValue > leftValue)
-            elementPos = 2;
-        else if (elementRight && rightValue > middleValue && rightValue > leftValue)
-            elementPos = 3;
-
-        if (elementRight) {
-            // The element is in the right barcode
+        // Deciding in which rotation the signal is. If signal not detected => parking spot #1
+        // parkingPos = 1;
+        // Creating color schemes for signal view on application
+        Scalar signalColor;
+        if (signalGreen) {
+            // The green side is facing us
             location = Location.RIGHT;
-            telemetry.addData("Team scoring element location: ", location);
-        }
-        else if (elementMiddle) {
-            // The element is in the middle barcode
+            signalColor = new Scalar(0, 255, 0);
+            parkingSpot = 3;
+        } else if (signalBlue) {
+            // The blue side is facing us
             location = Location.MIDDLE;
-            telemetry.addData("Team scoring element location: ", location);
-        }
-        else if (elementLeft) {
-            // The element is in the left barcode
+            signalColor = new Scalar(0, 0, 255);
+            parkingSpot = 2;
+        } else if (signalRed) {
+            // The red side is facing us
             location = Location.LEFT;
-            telemetry.addData("Team scoring element location: ", location);
-        }
-        else {
-            // The element has not been found
+            signalColor = new Scalar(255, 0, 0);
+            parkingSpot = 1;
+        } else {
+            // The signal has not been found
             location = Location.NOT_FOUND;
-            telemetry.addData("Team scoring element location: ", location);
+            signalColor = new Scalar(0, 0, 0);
+            parkingSpot = 1;
         }
 
-        telemetry.addData("elementpos", elementPos);
+        telemetry.addData("Parking spot location: ", location);
+        telemetry.addData("Parking spot", parkingSpot);
         telemetry.update();
 
-        // Return 2 RGB
+        // Return original mat to RGB color format
         Imgproc.cvtColor(mat, mat, Imgproc.COLOR_GRAY2RGB);
 
-        // Creating color schemes for duck view on barcodes
-        Scalar colorFound = new Scalar(0, 255, 0);
-        Scalar colorBlank = new Scalar(255, 0, 0);
-
         // Drawing rectangles for each barcode with matching color
-        Imgproc.rectangle(mat, LEFT_ROI, location == Location.LEFT? colorFound:colorBlank);
-        Imgproc.rectangle(mat, MIDDLE_ROI, location == Location.MIDDLE? colorFound:colorBlank);
-        Imgproc.rectangle(mat, RIGHT_ROI, location == Location.RIGHT? colorFound:colorBlank);
+        Imgproc.rectangle(mat, SIGNAL_ROI, signalColor);
 
         // Returning the mat to the main program
         return mat;
     }
 
-    public  Location getLocation(){ return location;}
+    public Location getLocation() {
+        return location;
+    }
 
-    public  int getPos() {return elementPos;}
+    public int getParkingSpot() {
+        return parkingSpot;
+    }
 
 }

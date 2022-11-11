@@ -27,19 +27,27 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-/*import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;*/
+import org.openftc.easyopencv.OpenCvWebcam;
 
 
 public abstract class PlanTechOpMode extends LinearOpMode {
 
     Gamepad gamepad1, gamepad2;
 
+    Servo servo1, servo2;
+    CRServo crServo1, crServo2;
+    DcMotorEx dcMotorEx1, dcMotorEx2;
+
+    protected WebcamName webcamName;
+    OpenCvCamera Logitech_C920;
+
     protected ElapsedTime runtime = new ElapsedTime();
 
     void initialize() {
+        webcamName = hardwareMap.get(WebcamName.class, "logitech_C920");
 
     }
 
@@ -66,6 +74,22 @@ public abstract class PlanTechOpMode extends LinearOpMode {
     protected abstract void run();
 
     protected abstract void end();
+
+    public void initCamera() {
+        Logitech_C920 = OpenCvCameraFactory.getInstance().createWebcam(webcamName);
+        ElementDetector detector = new ElementDetector(telemetry);
+        Logitech_C920.setPipeline(detector);
+        Logitech_C920.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                Logitech_C920.startStreaming(1920, 1080, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+            }
+        });
+    }
 
 }
 
